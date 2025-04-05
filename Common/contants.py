@@ -1,2 +1,2 @@
 APP_VERSION = "0.8.6"
-APP_NAME = "docker-manager-discord"
+APP_NAME = "discord-docker-manager"
