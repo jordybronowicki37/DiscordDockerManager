@@ -190,7 +190,7 @@ class CommandExecutor:
         await self.runner.run_container_from_git(git_repo_url, compose_name=docker_compose_name)
 
     async def get_containers_formatted(self, filter_name: str = "", status: str = ""):
-        if status is "":
+        if status == "":
             containers = self.docker_client.containers.list(all=True)
         else:
             containers = self.docker_client.containers.list(filters={"status": status})

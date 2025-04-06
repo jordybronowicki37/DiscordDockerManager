@@ -1,4 +1,5 @@
-version: '3.7'
+name: discord-docker-manager
+
 services:
   docker-manager-bot:
     build: ./
