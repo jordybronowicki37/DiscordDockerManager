@@ -40,10 +40,11 @@ logger.info('[INFO] Trying to get the docker client from the environment..')
 dockerClient = None
 try:
     dockerClient = docker.from_env()
-except DockerException:
+except DockerException as a:
     logger.error('____________________________________\n'
                  '[ERROR] Could not connect to docker. \n'
                  'Make sure that docker is running, and this app is running in the same environment.')
+    logger.error(a)
     exit("Exiting application.")
 
 
