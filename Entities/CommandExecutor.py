@@ -94,7 +94,7 @@ class CommandExecutor:
             title="Containers",
             description="To manage a specific container, use the container's name.",
             items=containers,
-            items_per_page=3
+            items_per_page=5
         )
 
     async def restart_container(self, container_name: str):
