@@ -148,7 +148,7 @@ async def remove(interaction: discord.Interaction, container_name: str):
 @app_commands.describe(exclude='A comma-separated string of container names to exclude. '
                                'Example: lucky_buck,magical_unicorn,bread_can')
 async def remove_range(interaction: discord.Interaction, container_range: int, exclude: str = ""):
-    """Retrieve the recent logs of a container."""
+    """Remove a range of containers. Warning: it cannot be recovered after."""
     check_if_allowed(interaction.user.id)
 
     executor = CommandExecutor(dockerClient, interaction=interaction)
@@ -191,9 +191,11 @@ async def run(interaction: discord.Interaction, image_name: str, cli_commands: s
 
 
 @discordClient.tree.command()
+@app_commands.rename(git_repo_url='git-repo-url')
 @app_commands.describe(git_repo_url='The url of the git repository')
+@app_commands.rename(docker_compose_name='docker-compose-name')
 @app_commands.describe(docker_compose_name='If the name of the compose file is different to "docker-compose.yml"')
-async def runfromgit(interaction: discord.Interaction, git_repo_url: str,
+async def run_from_git(interaction: discord.Interaction, git_repo_url: str,
                      docker_compose_name: str = "docker-compose.yml"):
     """Deploys the app from the given git repository. The repo needs to contain a docker-compose.yml file."""
     check_if_allowed(interaction.user.id)
