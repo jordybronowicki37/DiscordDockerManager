@@ -2,7 +2,8 @@ name: discord-docker-manager
 
 services:
   docker-manager-bot:
-    image: ghcr.io/jordybronowicki37/discord-docker-manager
+    build: ./
+    pull_policy: build
     container_name: discord-docker-manager
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
