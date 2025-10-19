@@ -161,15 +161,23 @@ async def remove_range(interaction: discord.Interaction, container_range: int, e
 @discordClient.tree.command()
 @app_commands.rename(container_name='container-name')
 @app_commands.describe(container_name='The name of the container to get the logs from')
-async def logs(interaction: discord.Interaction, container_name: str):
+@app_commands.rename(log_amount='log-amount')
+@app_commands.describe(log_amount='The amount of logs to retrieve')
+@app_commands.choices(log_amount=[
+    app_commands.Choice(name='No limit', value=0),
+    app_commands.Choice(name='50', value=50),
+    app_commands.Choice(name='100', value=100),
+    app_commands.Choice(name='200', value=200),
+    app_commands.Choice(name='500', value=500),
+    app_commands.Choice(name='1000', value=1000),
+])
+async def logs_command(interaction: discord.Interaction, container_name: str, log_amount: int):
     """Retrieve the recent logs of a container."""
     check_if_allowed(interaction.user.id)
 
     executor = CommandExecutor(dockerClient, interaction=interaction)
     logger.info("[INFO] Executing restart container command.")
-    await executor.retrieve_logs_from_container(container_name)
-
-    await update_container_amount()
+    await executor.retrieve_logs_from_container(container_name, log_amount)
 
 
 # Interaction with git repo's/hosted docker images #

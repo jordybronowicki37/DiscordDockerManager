@@ -131,20 +131,27 @@ class CommandExecutor:
             await self.message_creator.send_simple_message(f"Could not rename container. "
                                                            f"Reason: ```-diff{str(e.explanation)}```")
 
-    async def retrieve_logs_from_container(self, container_name):
+    async def retrieve_logs_from_container(self, container_name, log_amount):
         try:
             containerInfo: Container = self.docker_client.containers.get(container_name)
 
-            decoded_logs = containerInfo.logs().decode()
-            logs_without_ansi = strip_ansi_escape_codes(decoded_logs)
+            # If log_amount is <= 0, get all logs, otherwise limit with `tail`
+            if log_amount > 0:
+                raw_logs = containerInfo.logs(tail=log_amount)
+            else:
+                raw_logs = containerInfo.logs()
+
+            logs_without_ansi = strip_ansi_escape_codes(raw_logs.decode())
 
             pathlib.Path('temp').mkdir(exist_ok=True)
             tempFileName = f'temp/{containerInfo.name}-logs.txt'
-            with open(tempFileName, 'w') as f:
+            with open(tempFileName, 'w', encoding="utf-8") as f:
                 f.write(logs_without_ansi)
 
-            await self.message_creator.send_simple_message(f"Here are the logs of container **{containerInfo.name}**:",
-                                                           file=discord.File(tempFileName))
+            await self.message_creator.send_simple_message(
+                f"Here are the logs of container **{containerInfo.name}**:",
+                file=discord.File(tempFileName)
+            )
             os.remove(tempFileName)
         except NotFound:
             await self.__send_other_possible_containers(container_name)
