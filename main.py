@@ -182,6 +182,7 @@ async def remove_range_command(interaction: discord.Interaction, container_range
 @app_commands.describe(log_amount='The amount of logs to retrieve')
 @app_commands.choices(log_amount=[
     app_commands.Choice(name='No limit', value=0),
+    app_commands.Choice(name='20', value=20),
     app_commands.Choice(name='50', value=50),
     app_commands.Choice(name='100', value=100),
     app_commands.Choice(name='200', value=200),
