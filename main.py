@@ -59,8 +59,8 @@ async def on_ready():
 
 # COMMANDS #
 
-@discordClient.tree.command()
-async def help(interaction: discord.Interaction):
+@discordClient.tree.command(name='help')
+async def help_command(interaction: discord.Interaction):
     """Overview of all possible commands"""
     check_if_allowed(interaction.user.id)
 
@@ -71,24 +71,40 @@ async def help(interaction: discord.Interaction):
     await update_container_amount()
 
 
-@discordClient.tree.command()
+@discordClient.tree.command(name='containers')
 @app_commands.rename(container_name='container-name')
-@app_commands.describe(container_name='Leave empty to get all containers')
-async def containers(interaction: discord.Interaction, container_name: str = "", status: str = ""):
+@app_commands.describe(container_name='Filter on container name')
+@app_commands.describe(status='Filter on the status of a container')
+async def containers_command(interaction: discord.Interaction, container_name: str = '', status: str = ''):
     """Overview of all containers. Use the filter to look for specific containers."""
     check_if_allowed(interaction.user.id)
 
     logger.info("[INFO] Executing container overview command.")
     executor = CommandExecutor(dockerClient, interaction=interaction)
-    await executor.get_and_send_containers(container_name, status)
+    await executor.get_and_send_containers(filter_name=container_name, status=status)
 
     await update_container_amount()
 
 
-@discordClient.tree.command()
+@discordClient.tree.command(name='container-status')
+@app_commands.rename(container_name='container-name')
+@app_commands.describe(container_name='View a container')
+async def container_status_command(interaction: discord.Interaction, container_name: str):
+    """Overview of all containers. Use the filter to look for specific containers."""
+    check_if_allowed(interaction.user.id)
+
+    logger.info("[INFO] Executing container overview command.")
+    executor = CommandExecutor(dockerClient, interaction=interaction)
+    # TODO add more specific status properties
+    await executor.get_and_send_containers(filter_name=container_name)
+
+    await update_container_amount()
+
+
+@discordClient.tree.command(name='container-restart')
 @app_commands.rename(container_name='container-name')
 @app_commands.describe(container_name='The name of the container to restart')
-async def restart(interaction: discord.Interaction, container_name: str):
+async def restart_command(interaction: discord.Interaction, container_name: str):
     """Restart a container."""
     check_if_allowed(interaction.user.id)
 
@@ -99,10 +115,10 @@ async def restart(interaction: discord.Interaction, container_name: str):
     await update_container_amount()
 
 
-@discordClient.tree.command()
+@discordClient.tree.command(name='container-stop')
 @app_commands.rename(container_name='container-name')
 @app_commands.describe(container_name='The name of the container to stop')
-async def stop(interaction: discord.Interaction, container_name: str):
+async def stop_command(interaction: discord.Interaction, container_name: str):
     """Stop a container."""
     check_if_allowed(interaction.user.id)
 
@@ -113,12 +129,12 @@ async def stop(interaction: discord.Interaction, container_name: str):
     await update_container_amount()
 
 
-@discordClient.tree.command()
+@discordClient.tree.command(name='container-rename')
 @app_commands.rename(old_name='old-name')
 @app_commands.describe(old_name='The name of the container to rename')
 @app_commands.rename(new_name='new-name')
 @app_commands.describe(new_name='The new name of the container')
-async def rename(interaction: discord.Interaction, old_name: str, new_name: str):
+async def rename_command(interaction: discord.Interaction, old_name: str, new_name: str):
     """Rename a container."""
     check_if_allowed(interaction.user.id)
 
@@ -129,10 +145,10 @@ async def rename(interaction: discord.Interaction, old_name: str, new_name: str)
     await update_container_amount()
 
 
-@discordClient.tree.command()
+@discordClient.tree.command(name='container-remove')
 @app_commands.rename(container_name='container-name')
 @app_commands.describe(container_name='The name of the container to remove')
-async def remove(interaction: discord.Interaction, container_name: str):
+async def remove_command(interaction: discord.Interaction, container_name: str):
     """Remove a container. Warning: it cannot be recovered after."""
     check_if_allowed(interaction.user.id)
 
@@ -143,11 +159,12 @@ async def remove(interaction: discord.Interaction, container_name: str):
     await update_container_amount()
 
 
-@discordClient.tree.command()
+@discordClient.tree.command(name='container-remove-range')
+@app_commands.rename(container_range='container-range')
 @app_commands.describe(container_range='The amount of the most recent containers to remove')
 @app_commands.describe(exclude='A comma-separated string of container names to exclude. '
                                'Example: lucky_buck,magical_unicorn,bread_can')
-async def remove_range(interaction: discord.Interaction, container_range: int, exclude: str = ""):
+async def remove_range_command(interaction: discord.Interaction, container_range: int, exclude: str = ""):
     """Remove a range of containers. Warning: it cannot be recovered after."""
     check_if_allowed(interaction.user.id)
 
@@ -158,7 +175,7 @@ async def remove_range(interaction: discord.Interaction, container_range: int, e
     await update_container_amount()
 
 
-@discordClient.tree.command()
+@discordClient.tree.command(name='container-logs')
 @app_commands.rename(container_name='container-name')
 @app_commands.describe(container_name='The name of the container to get the logs from')
 @app_commands.rename(log_amount='log-amount')
@@ -182,14 +199,14 @@ async def logs_command(interaction: discord.Interaction, container_name: str, lo
 
 # Interaction with git repo's/hosted docker images #
 
-@discordClient.tree.command()
+@discordClient.tree.command(name='container-run')
 @app_commands.rename(image_name='image')
-@app_commands.rename(cli_commands='cli-commands')
 @app_commands.describe(image_name='The name of the image to pull and run')
+@app_commands.rename(cli_commands='cli-commands')
 @app_commands.describe(cli_commands='command to run after the container started')
+@app_commands.rename(container_name='container-name')
 @app_commands.describe(container_name='The name to give the new container')
-async def run(interaction: discord.Interaction, image_name: str, cli_commands: str = None,
-              container_name: str = None):
+async def run_command(interaction: discord.Interaction, image_name: str, cli_commands: str = None, container_name: str = None):
     """Run a new container using an existing image like you would when using `docker run`."""
     executor = CommandExecutor(dockerClient, interaction=interaction)
     logger.info("[INFO] Executing run new container command.")
@@ -198,13 +215,12 @@ async def run(interaction: discord.Interaction, image_name: str, cli_commands: s
     await update_container_amount()
 
 
-@discordClient.tree.command()
+@discordClient.tree.command(name='container-run-from-git')
 @app_commands.rename(git_repo_url='git-repo-url')
 @app_commands.describe(git_repo_url='The url of the git repository')
 @app_commands.rename(docker_compose_name='docker-compose-name')
 @app_commands.describe(docker_compose_name='If the name of the compose file is different to "docker-compose.yml"')
-async def run_from_git(interaction: discord.Interaction, git_repo_url: str,
-                     docker_compose_name: str = "docker-compose.yml"):
+async def run_from_git_command(interaction: discord.Interaction, git_repo_url: str, docker_compose_name: str = "docker-compose.yml"):
     """Deploys the app from the given git repository. The repo needs to contain a docker-compose.yml file."""
     check_if_allowed(interaction.user.id)
 
@@ -217,12 +233,12 @@ async def run_from_git(interaction: discord.Interaction, git_repo_url: str,
 
 # Autocomplete functionality #
 
-@restart.autocomplete('container_name')
-@stop.autocomplete('container_name')
-@remove.autocomplete('container_name')
-@rename.autocomplete('old_name')
-@containers.autocomplete('container_name')
-@logs.autocomplete('container_name')
+@restart_command.autocomplete('container_name')
+@stop_command.autocomplete('container_name')
+@remove_command.autocomplete('container_name')
+@rename_command.autocomplete('old_name')
+@container_status_command.autocomplete('container_name')
+@logs_command.autocomplete('container_name')
 async def containers_autocomplete(interaction: discord.Interaction, current: str) -> List[app_commands.Choice[str]]:
     executor = CommandExecutor(dockerClient, interaction=interaction)
     container_infos = await executor.get_containers_formatted()
@@ -235,7 +251,7 @@ async def containers_autocomplete(interaction: discord.Interaction, current: str
     ]
 
 
-@remove_range.autocomplete('exclude')
+@remove_range_command.autocomplete('exclude')
 async def all_containers_autocomplete(interaction: discord.Interaction, current: str) -> List[app_commands.Choice[str]]:
     executor = CommandExecutor(dockerClient, interaction=interaction)
     container_infos = await executor.get_containers_formatted()
@@ -250,7 +266,7 @@ async def all_containers_autocomplete(interaction: discord.Interaction, current:
     ]
 
 
-@containers.autocomplete("status")
+@containers_command.autocomplete("status")
 async def containers_autocomplete(interaction: discord.Interaction, current: str) -> List[app_commands.Choice[str]]:
     return [
         app_commands.Choice(name=status, value=status)
@@ -259,11 +275,11 @@ async def containers_autocomplete(interaction: discord.Interaction, current: str
     ]
 
 
-def check_if_allowed(userId):
-    userId = str(userId)
-    if userId not in ADMINS:
+def check_if_allowed(user_id):
+    user_id = str(user_id)
+    if user_id not in ADMINS:
         logger.warning("[INFO] Container overview command called by non-admin.")
-        raise Exception(f"Nuh-uh: user {userId} is not a registered admin.")
+        raise Exception(f"Nuh-uh: user {user_id} is not a registered admin.")
 
 
 async def update_container_amount():
