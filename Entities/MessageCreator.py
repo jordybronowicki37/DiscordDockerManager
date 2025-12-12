@@ -9,9 +9,9 @@ class MessageCreator:
         self.message = None
         self.interaction = None
 
-        if interaction is None:
+        if message is not None:
             self.message = message
-        elif message is None:
+        elif interaction is not None:
             self.interaction = interaction
         else:
             raise Exception("please provide either a message or an interaction.")
@@ -69,10 +69,12 @@ class MessageCreator:
         )
 
     async def send_exception(self, exception_message: str, description: str = "", followup=False):
-        await self.send_simple_embed(title=description if description != '' else "Could not run command.",
-                                     name="Reason:",
-                                     text=f"""```diff\n- {str(exception_message)}```""",
-                                     followup=followup)
+        await self.send_simple_embed(
+            title=description if description != '' else "Could not run command.",
+            name="Reason:",
+            text=f"""```diff\n- {str(exception_message)}```""",
+            followup=followup
+        )
 
 
 def get_standard_embed():
